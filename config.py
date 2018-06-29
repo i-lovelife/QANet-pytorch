@@ -84,12 +84,12 @@ flags.DEFINE_integer("num_threads", 4, "Number of threads in input pipeline")
 flags.DEFINE_boolean("is_bucket", False, "build bucket batch iterator or not")
 flags.DEFINE_list("bucket_range", [40, 401, 40], "the range of bucket")
 
-flags.DEFINE_integer("batch_size", 32, "Batch size")
+flags.DEFINE_integer("batch_size", 20, "Batch size")
 flags.DEFINE_integer("num_steps", 60000, "Number of steps")
-flags.DEFINE_integer("checkpoint", 1000, "checkpoint to save and evaluate the model")
+flags.DEFINE_integer("checkpoint", 200, "checkpoint to save and evaluate the model")
 flags.DEFINE_integer("period", 100, "period to save batch loss")
-flags.DEFINE_integer("val_num_batches", 150, "Number of batches to evaluate the model")
-flags.DEFINE_integer("test_num_batches", 150, "Number of batches to evaluate the model")
+flags.DEFINE_integer("test_num_batches", -1, "Number of batches to evaluate the model")
+flags.DEFINE_boolean("disable_dropout", False, "wheather disable dropout")
 flags.DEFINE_float("dropout", 0.1, "Dropout prob across the layers")
 flags.DEFINE_float("dropout_char", 0.05, "Dropout prob across the layers")
 flags.DEFINE_float("grad_clip", 5.0, "Global Norm gradient clipping rate")
@@ -111,9 +111,9 @@ flags.DEFINE_boolean("pretrained_char", False, "Whether to use pretrained char e
 fasttext_file = os.path.join(home, "data", "fasttext", "wiki-news-300d-1M.vec")
 flags.DEFINE_string("fasttext_file", fasttext_file, "Fasttext word embedding")
 flags.DEFINE_boolean("fasttext", False, "Whether to use fasttext")
+flags.DEFINE_boolean("use_tensorboard", False, "Whether to use tensorboard")
 
 config = flags.FLAGS
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-cudnn.enabled = False
+#cudnn.enabled = False

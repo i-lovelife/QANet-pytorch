@@ -117,68 +117,6 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None):
     emb_mat = [idx2emb_dict[idx] for idx in range(len(idx2emb_dict))]
     return emb_mat, token2idx_dict
 
-
-def convert_to_features(config, data, word2idx_dict, char2idx_dict):
-    example = {}
-    context, question = data
-    context = context.replace("''", '" ').replace("``", '" ')
-    question = question.replace("''", '" ').replace("``", '" ')
-    example['context_tokens'] = word_tokenize(context)
-    example['ques_tokens'] = word_tokenize(question)
-    example['context_chars'] = [list(token) for token in example['context_tokens']]
-    example['ques_chars'] = [list(token) for token in example['ques_tokens']]
-
-    para_limit = config.para_limit
-    ques_limit = config.ques_limit
-    ans_limit = config.ans_limit
-    char_limit = config.char_limit
-
-    def filter_func(example):
-        return len(example["context_tokens"]) > para_limit or \
-               len(example["ques_tokens"]) > ques_limit
-
-    if filter_func(example):
-        raise ValueError("Context/Questions lengths are over the limit")
-
-    context_idxs = np.zeros([para_limit], dtype=np.int32)
-    context_char_idxs = np.zeros([para_limit, char_limit], dtype=np.int32)
-    ques_idxs = np.zeros([ques_limit], dtype=np.int32)
-    ques_char_idxs = np.zeros([ques_limit, char_limit], dtype=np.int32)
-    y1 = np.zeros([para_limit], dtype=np.float32)
-    y2 = np.zeros([para_limit], dtype=np.float32)
-
-    def _get_word(word):
-        for each in (word, word.lower(), word.capitalize(), word.upper()):
-            if each in word2idx_dict:
-                return word2idx_dict[each]
-        return 1
-
-    def _get_char(char):
-        if char in char2idx_dict:
-            return char2idx_dict[char]
-        return 1
-
-    for i, token in enumerate(example["context_tokens"]):
-        context_idxs[i] = _get_word(token)
-
-    for i, token in enumerate(example["ques_tokens"]):
-        ques_idxs[i] = _get_word(token)
-
-    for i, token in enumerate(example["context_chars"]):
-        for j, char in enumerate(token):
-            if j == char_limit:
-                break
-            context_char_idxs[i, j] = _get_char(char)
-
-    for i, token in enumerate(example["ques_chars"]):
-        for j, char in enumerate(token):
-            if j == char_limit:
-                break
-            ques_char_idxs[i, j] = _get_char(char)
-
-    return context_idxs, context_char_idxs, ques_idxs, ques_char_idxs
-
-
 def build_features(config, examples, data_type, out_file, word2idx_dict, char2idx_dict, is_test=False):
     para_limit = config.para_limit
     ques_limit = config.ques_limit
